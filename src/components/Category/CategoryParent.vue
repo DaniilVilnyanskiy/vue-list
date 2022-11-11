@@ -1,17 +1,27 @@
 <template lang="pug">
-.category
-  .category-parent.border
-    Icon(icon="arrow-up")
-    span {{ object.title }}
-  .categoty-children
-    CategoryChild(v-for="element in object.children"
-      @mouseup="this.mouseUp"
-      @mousedown="this.mouseDown"
-      :object="element"
-      :class="(element.isMove ? 'move' : '') + (hoverElId === element.id ? ' hover' : '')"
-      :data-id="element.id"
-      :style=`{top: element.isMove ? coords.y - 20 + 'px' : 0,
-            left: element.isMove ? coords.x - 80 + 'px' : 0}`)
+.category.accordion-custom(:class="(object.isActiveAcc) ? 'active' : ''") {{isActiveAcc}}
+  .category-parent.border.accordion-head-custom(:data-id="object.id")
+    button.btn.btn-round(@click="this.clickBtnAcc")
+      Icon(icon="arrow-up")
+    span.first-title {{ object.title }}
+    span {{ object.required }}
+    span.category-parent__subtitle {{ object.info }}
+  ul.category-children.accordion-body-custom.border-l.border-r
+    li.category-child-li(v-for="element in object.children")
+      CategoryChild(
+        @mouseup="this.mouseUp"
+        @mousedown="this.mouseDown"
+        :object="element"
+        :class="(element.isMove ? 'opacity' : '') + (hoverElId === element.id ? ' hover' : '')"
+        :data-id="element.id")
+      CategoryChild(v-if="element.isMove"
+        @mouseup="this.mouseUp"
+        @mousedown="this.mouseDown"
+        :object="element"
+        :class="'move'"
+        :data-id="element.id"
+        :style=`{top: element.isMove ? coords.y - 20 + 'px' : 0,
+              left: element.isMove ? coords.x - 80 + 'px' : 0}`)
 </template>
 
 <script>
@@ -24,21 +34,91 @@ export default {
     Icon, CategoryChild
   },
   props: [
-      'object', 'coords', 'hoverElId'
+      'object', 'coords', 'hoverElId', 'isActiveAcc'
   ],
+  data () {
+    return {
+      data: {
+      }
+    }
+  },
   methods: {
+    clickBtnAcc() {
+      this.$emit('clickBtnAcc')
+    },
     mouseUp () {
       this.$emit('mouseUp')
     },
     mouseDown () {
       this.$emit('mouseDown')
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="scss" scoped>
-.category-parent {
-  padding: 13px 16px;
-  position: relative;
+.category {
+  &.move {
+    position: absolute;
+    width: 82%;
+    background-color: transparent;
+    z-index: 1000;
+    pointer-events: none;
+    border: 1px solid $lightgrey;
+    box-shadow: $blue-boxshadow;
+  }
+  &.hover {
+    border-bottom: 5px solid $blue !important;
+  }
+  &-parent {
+    padding: 13px 16px;
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    background-color: white;
+
+    &__subtitle {
+      font-weight: 400;
+      font-size: 11px;
+      line-height: 108%;
+      color: $pink;
+    }
+    span {
+      margin-left: 14px;
+    }
+  }
+  &-children {
+    margin-left: 16px;
+    .category-child-li:last-child {
+      .category-child {
+        border: none;
+      }
+    }
+  }
+  .btn-round {
+    svg {
+      transform: rotate(180deg);
+      transition: .3s ease-in-out;
+    }
+  }
+  &.accordion-custom {
+    &.active {
+      .btn-round {
+        svg {
+          transform: rotate(0deg);
+        }
+      }
+      .accordion-body-custom {
+        max-height: none;
+      }
+      &.opacity {
+        .accordion-body-custom {
+          max-height: none;
+        }
+      }
+    }
+    .accordion-body-custom {
+      max-height: 0;
+    }
+  }
 }
 </style>

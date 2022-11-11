@@ -1,6 +1,8 @@
 <template lang="pug">
-.category-child.border
-  span {{ object.title }}
+.category-child.border-b
+  span.second-title {{ object.title }}
+  span.category-child__required {{ object.required }}
+  span.category-child__subtitle {{ object.info }}
 </template>
 
 <script>
@@ -18,12 +20,20 @@ export default {
 .category-child {
   padding: 9px 15px;
   position: relative;
+  display: flex;
+  align-items: baseline;
+  background-color: white;
+  span {
+    margin-left: 14px;
+  }
   &.move {
     position: absolute;
-    width: 100%;
+    width: 82%;
     background-color: white;
     z-index: 1000;
     pointer-events: none;
+    border: 1px solid $lightgrey;
+    box-shadow: $blue-boxshadow;
   }
   &.hover {
     border-bottom: 5px solid $blue !important;
