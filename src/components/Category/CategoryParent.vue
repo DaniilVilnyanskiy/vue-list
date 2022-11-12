@@ -4,10 +4,12 @@
     button.btn.btn-round(@click="this.clickBtnAcc")
       Icon(icon="arrow-up")
     span.first-title {{ object.title }}
-    span {{ object.required }}
+    span.category-child__required(v-if="object.required") {{ object.required }}
+    div.d-inline-flex.category-marks(v-if="object.marks")
+      span(v-for="marks in object.marks" :class="marks")
     span.category-parent__subtitle {{ object.info }}
   ul.category-children.accordion-body-custom.border-l.border-r
-    li.category-child-li(v-for="element in object.children")
+    li.category-child-li.d-block(v-for="element in object.children")
       CategoryChild(
         @mouseup="this.mouseUp"
         @mousedown="this.mouseDown"
@@ -59,6 +61,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .category {
+  &:hover {
+    cursor: grab;
+  }
   &.move {
     position: absolute;
     width: 82%;
@@ -67,6 +72,10 @@ export default {
     pointer-events: none;
     border: 1px solid $lightgrey;
     box-shadow: $blue-boxshadow;
+
+    .category-children {
+      display: none;
+    }
   }
   &.hover {
     border-bottom: 5px solid $blue !important;
@@ -76,6 +85,7 @@ export default {
     position: relative;
     display: flex;
     align-items: baseline;
+    gap: 16px;
     background-color: white;
 
     &__subtitle {
@@ -85,7 +95,7 @@ export default {
       color: $pink;
     }
     span {
-      margin-left: 14px;
+      //margin-left: 14px;
     }
   }
   &-children {
@@ -98,6 +108,7 @@ export default {
   }
   .btn-round {
     svg {
+
       transform: rotate(180deg);
       transition: .3s ease-in-out;
     }

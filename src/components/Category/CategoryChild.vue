@@ -1,7 +1,9 @@
 <template lang="pug">
 .category-child.border-b
   span.second-title {{ object.title }}
-  span.category-child__required {{ object.required }}
+  div.d-inline-flex.category-marks(v-if="object.marks")
+    span(v-for="marks in object.marks" :class="marks")
+  span.category-child__required(v-if="object.required") {{ object.required }}
   span.category-child__subtitle {{ object.info }}
 </template>
 
@@ -22,9 +24,10 @@ export default {
   position: relative;
   display: flex;
   align-items: baseline;
+  gap: 16px;
   background-color: white;
   span {
-    margin-left: 14px;
+    //margin-left: 14px;
   }
   &.move {
     position: absolute;

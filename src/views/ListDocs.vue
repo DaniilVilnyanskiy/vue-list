@@ -1,7 +1,10 @@
 <template  lang="pug">
-.list
-  h1 Документы
-  input(type="search")
+.list(:class="(this.data.cursorGrab === true) ? 'cursor-grab' : ''")
+  .list__head
+    h1 Документы
+  .row
+    .col.col-lg-6
+      Input(@event-input="this.eventInput")
   ul.category-list.mb-4.mt-4
     li(class="category-list__parent" v-for="(object, key) in this.filterArrayParent")
 
@@ -38,25 +41,28 @@
         :data-id="object.id"
         :style=`{top: object.isMove ? this.data.coords.y - 20 + 'px' : 0,
             left: object.isMove ? this.data.coords.x - 80 + 'px' : 0}`)
+    li.category-list-li_drag-here Можете перетащить сюда элемент из категории
 
 </template>
 
 <script>
 import Icon from "../components/Icon/Icon.vue";
+import Input from "../components/Input/Input.vue"
 
 import CategoryParent from "../components/Category/CategoryParent.vue";
 import CategoryChild from "../components/Category/CategoryChild.vue";
 
 export default {
   components: {
-    Icon, CategoryParent, CategoryChild
+    Icon, CategoryParent, CategoryChild, Input
   },
   data () {
     return {
       data: {
         coords: {},
         isMove: false,
-        hoverElId: -1
+        hoverElId: -1,
+        dataParent: '',
       },
       init: [
         {
@@ -71,12 +77,18 @@ export default {
           info: 'Документы, обязательные для всех сотрудников без исключения',
           status: 'parent',
           id: 6,
+          marks: [
+            'red-pink', 'yellow', 'yellow-shadow'
+          ],
           children: [
             {
               name: '',
               title: 'Паспорт',
               info: 'Для всех',
               required: 'Обязательный',
+              marks: [
+                'light-blue'
+              ],
               status: 'child',
               id: 7,
             },
@@ -148,6 +160,9 @@ export default {
           name: '',
           title: 'Трудовой договор',
           info: '',
+          marks: [
+            'blue', 'pink'
+          ],
           id: 3,
           status: 'child',
         },
@@ -176,7 +191,9 @@ export default {
       })
     },
     onMouseDown(e) {
-      if (typeof e === 'undefined') return;
+      if (typeof e === 'undefined' || e.target.closest('button')) return;
+
+      this.data.cursorGrab = true;
       let parentChild = e.target.closest('.category-child');
 
       if (!parentChild) parentChild = e.target.closest('.category-parent');
@@ -186,6 +203,7 @@ export default {
 
       const parentChildId = Number(parentChild.dataset.id);
       this.data.isMove = true;
+      this.mouseEvent(e)
       this.data.moveElementId = parentChildId;
       this.setElementMove(parentChildId);
     },
@@ -195,6 +213,7 @@ export default {
     onMouseUpChild(e) {
       if (typeof e === 'undefined') return;
 
+      this.data.cursorGrab = false;
       this.data.isMove = false;
 
       this.setElementMove(-1);
@@ -263,34 +282,61 @@ export default {
     initAccordion(obj) {
       if (typeof obj == 'undefined') return
       obj.isActiveAcc !== true ? obj.isActiveAcc = true : delete obj.isActiveAcc;
+    },
+    mouseEvent(e) {
+      if (!this.data.isMove) {
+        this.data.hoverElId = -1
+        return
+      }
+      this.data.coords.y = e.y;
+      this.data.coords.x = e.x;
+      if (e.target.closest('.category-child')) {
+        if (this.data.dataParentt !== true) {
+          this.data.hoverElId = Number(e.target.closest('.category-child').dataset.id);
+        }
+      } else if (e.target.closest('.category-parent')) {
+        this.data.hoverElId = Number(e.target.closest('.category-parent').dataset.id);
+      } else if (e.target.closest('.category-extra')) {
+        this.data.hoverElId = -100
+      }
+      // console.log(this.data.hoverElId);
+      // console.log(this.data.dataParent);
+    },
+    eventInput(e) {
+      const inputValue = e.target.value.toLowerCase();
+      const strings = document.querySelectorAll('.category-child');
+      strings.forEach((string) => {
+        const title = string.querySelector('.second-title');
+        const str = title.innerHTML.toLowerCase();
+        const parent = string.closest('.category');
+        if (str.indexOf(inputValue) > -1) {
+          string.parentElement.classList.remove('d-none')
+          string.parentElement.classList.add('d-block')
+          parent?.classList.remove('d-none')
+        } else {
+          string.parentElement.classList.add('d-none')
+          string.parentElement.classList.remove('d-block')
+
+          // console.log(parent);
+          if (parent) {
+            console.log(parent.querySelectorAll('.category-child-li.d-block'));
+            if (parent.querySelectorAll('.category-child-li.d-block').length === 0) {
+              parent.classList.add('d-none')
+            } else {
+              parent.classList.remove('d-none')
+            }
+          }
+        }
+      })
     }
   },
   mounted () {
-
     this.$nextTick(function () {
 
       this.initAccordion()
 
       document.addEventListener('mousemove', (e) => {
-        if (!this.data.isMove) {
-          this.data.hoverElId = -1
-          return
-        }
-        this.data.coords.y = e.y;
-        this.data.coords.x = e.x;
-        // this.data.dataParent = false;
-        if (e.target.closest('.category-child')) {
-          console.log(this.data.dataParentt);
-          if (this.data.dataParentt !== true) {
-            this.data.hoverElId = Number(e.target.closest('.category-child').dataset.id);
-          }
-        } else if (e.target.closest('.category-parent')) {
-          this.data.hoverElId = Number(e.target.closest('.category-parent').dataset.id);
-        } else if (e.target.closest('.category-extra')) {
-          this.data.hoverElId = -100
-        }
-        // console.log(this.data.hoverElId);
-        // console.log(this.data.dataParent);
+        this.mouseEvent(e)
       })
       document.addEventListener('mouseup', this.onMouseUpChild)
 
@@ -301,6 +347,10 @@ export default {
 
 <style lang="scss">
 .list {
+  &__head {
+    display: flex;
+    margin-bottom: 23px;
+  }
   ul {
     list-style: none;
     padding: 0;
@@ -328,6 +378,14 @@ export default {
     padding: 5px;
     padding-bottom: 50px;
     background-color: rgba(0, 102, 255, 0.1);
+    .category-list__child + .category-list-li_drag-here {
+      display: none;
+    }
+    .category-list-li_drag-here {
+      text-align: center;
+      height: 100%;
+      opacity: .6;
+    }
   }
 }
 button {
