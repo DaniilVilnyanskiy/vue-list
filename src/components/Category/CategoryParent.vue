@@ -1,6 +1,6 @@
 <template lang="pug">
-.category.accordion-custom(:class="(object.isActiveAcc) ? 'active' : ''") {{isActiveAcc}}
-  .category-parent.border.accordion-head-custom(:data-id="object.id")
+.category.accordion-custom( :class="(object.isActiveAcc) ? 'active' : ''") {{isActiveAcc}}
+  .category-parent.border.accordion-head-custom(:data-id="object.id" :data-parentt="true")
     button.btn.btn-round(@click="this.clickBtnAcc")
       Icon(icon="arrow-up")
     span.first-title {{ object.title }}
@@ -43,8 +43,10 @@ export default {
     }
   },
   methods: {
-    clickBtnAcc() {
-      this.$emit('clickBtnAcc')
+    clickBtnAcc(e) {
+      this.$emit('clickBtnAcc', {
+        e
+      })
     },
     mouseUp () {
       this.$emit('mouseUp')

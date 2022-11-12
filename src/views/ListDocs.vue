@@ -9,8 +9,8 @@
         :coords="this.data.coords"
         :hoverElId="this.data.hoverElId"
         @mousedown="this.onMouseDown"
-        v-on:click-btn-acc="this.initAccordion(object)"
-        v-on:mouse-down="this.onMouseDown"
+        @click-btn-acc="this.initAccordion(object)"
+        @mouse-down="this.onMouseDown"
         :class="(object.isMove ? 'opacity' : '') + (this.data.hoverElId === object.id ? ' hover' : '')")
       CategoryParent(
         v-if="object.isMove"
@@ -18,8 +18,8 @@
         :coords="this.data.coords"
         :hoverElId="this.data.hoverElId"
         @mousedown="this.onMouseDown"
-        v-on:click-btn-acc="this.initAccordion(object)"
-        v-on:mouse-down="this.onMouseDown"
+        @click-btn-acc="this.initAccordion(object)"
+        @mouse-down="this.onMouseDown"
         :class="'move'"
         :style=`{top: object.isMove ? this.data.coords.y - 20 + 'px' : 0,
             left: object.isMove ? this.data.coords.x - 80 + 'px' : 0}`)
@@ -182,18 +182,24 @@ export default {
       if (!parentChild) parentChild = e.target.closest('.category-parent');
       if (!parentChild) return;
 
+      parentChild.closest('[data-parentt="true"]') ? this.data.dataParentt = true : this.data.dataParentt = false
+
       const parentChildId = Number(parentChild.dataset.id);
       this.data.isMove = true;
       this.data.moveElementId = parentChildId;
       this.setElementMove(parentChildId);
     },
+    /**
+     * Отпускание мыши
+     */
     onMouseUpChild(e) {
       if (typeof e === 'undefined') return;
 
       this.data.isMove = false;
 
       this.setElementMove(-1);
-      if (this.data.hoverElId !== -1 && this.data.hoverElId !== this.data.moveElementId) {
+      // console.log(this.data.dataParent);
+      if (this.data.hoverElId !== -1 && this.data.hoverElId !== this.data.moveElementId && !this.data.dataParent) {
         this.changeArray(this.data.hoverElId)
       }
     },
@@ -218,8 +224,9 @@ export default {
       return result
 
     },
+
     /**
-     *
+     * вставляем элемент
      * @param el - элемент который отпустили
      */
     includeElement(el) {
@@ -229,8 +236,8 @@ export default {
       }
       this.init.filter((elem, i) => {
         // elem - элемент над которым отпустили
+        // console.log(this.data.hoverElId); // навели
         if (elem.id === this.data.hoverElId) {
-          console.log(elem);
           if (elem.status === 'child' ) {
             this.init.splice(i+1, 0, el)
           } else if (el.status === 'parent') {
@@ -241,15 +248,16 @@ export default {
           }
         }
         if (typeof elem.children !== 'undefined') {
-          elem.children.filter((child, j) => {
-            (child.id === this.data.hoverElId) ? this.init[i].children.splice(j+1, 0, el) : ''
-          })
+          if (el.status !== 'parent') {
+            elem.children.filter((child, j) => {
+              (child.id === this.data.hoverElId) ? this.init[i].children.splice(j+1, 0, el) : ''
+            })
+          }
         }
       })
     },
     changeArray(id) {
       const changeElement = this.executeElement(this.data.moveElementId);
-      // console.log(changeElement);
       this.includeElement(changeElement);
     },
     initAccordion(obj) {
@@ -270,14 +278,19 @@ export default {
         }
         this.data.coords.y = e.y;
         this.data.coords.x = e.x;
+        // this.data.dataParent = false;
         if (e.target.closest('.category-child')) {
-          this.data.hoverElId = Number(e.target.closest('.category-child').dataset.id);
+          console.log(this.data.dataParentt);
+          if (this.data.dataParentt !== true) {
+            this.data.hoverElId = Number(e.target.closest('.category-child').dataset.id);
+          }
         } else if (e.target.closest('.category-parent')) {
           this.data.hoverElId = Number(e.target.closest('.category-parent').dataset.id);
         } else if (e.target.closest('.category-extra')) {
           this.data.hoverElId = -100
         }
-        console.log(this.data.hoverElId);
+        // console.log(this.data.hoverElId);
+        // console.log(this.data.dataParent);
       })
       document.addEventListener('mouseup', this.onMouseUpChild)
 
