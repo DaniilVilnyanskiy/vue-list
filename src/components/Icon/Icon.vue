@@ -10,7 +10,7 @@ export default {
       return 'icon icon-' + this.icon;
     },
     concatXlink: function () {
-      return '/src/assets/images/svg/sprite.svg#' + this.icon
+      return '/public/images/svg/sprite.svg#' + this.icon
     }
   },
 }
