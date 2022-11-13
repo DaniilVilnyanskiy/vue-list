@@ -6,7 +6,7 @@
     .col.col-lg-6
       Input(@event-input="this.eventInput")
   ul.category-list.mb-4.mt-4
-    li(class="category-list__parent" v-for="(object, key) in this.filterArrayParent")
+    li.category-list__parent(:class="object.isActiveAcc ? 'active-accordion' : ''" v-for="(object, key) in this.filterArrayParent")
 
       CategoryParent(:object="object"
         :coords="this.data.coords"
@@ -14,15 +14,13 @@
         @mousedown="this.onMouseDown"
         @click-btn-acc="this.initAccordion(object)"
         @mouse-down="this.onMouseDown"
+        @touchstart="this.onMouseDown"
         :class="(object.isMove ? 'opacity' : '') + (this.data.hoverElId === object.id ? ' hover' : '')")
       CategoryParent(
         v-if="object.isMove"
         :object="object"
         :coords="this.data.coords"
         :hoverElId="this.data.hoverElId"
-        @mousedown="this.onMouseDown"
-        @click-btn-acc="this.initAccordion(object)"
-        @mouse-down="this.onMouseDown"
         :class="'move'"
         :style=`{top: object.isMove ? this.data.coords.y - 20 + 'px' : 0,
             left: object.isMove ? this.data.coords.x - 80 + 'px' : 0}`)
@@ -31,12 +29,14 @@
 
       CategoryChild(:object="object"
         @mousedown="this.onMouseDown"
+        @touchstart="this.onMouseDown"
         :class="(object.isMove ? 'opacity' : '') + (this.data.hoverElId === object.id ? ' hover' : '')"
         :data-id="object.id")
       CategoryChild(
         v-if="object.isMove"
         :object="object"
         @mousedown="this.onMouseDown"
+        @touchstart="this.onMouseDown"
         class="move"
         :data-id="object.id"
         :style=`{top: object.isMove ? this.data.coords.y - 20 + 'px' : 0,
@@ -281,6 +281,7 @@ export default {
     },
     initAccordion(obj) {
       if (typeof obj == 'undefined') return
+      console.log(obj);
       obj.isActiveAcc !== true ? obj.isActiveAcc = true : delete obj.isActiveAcc;
     },
     mouseEvent(e) {
@@ -338,7 +339,11 @@ export default {
       document.addEventListener('mousemove', (e) => {
         this.mouseEvent(e)
       })
+      document.addEventListener('touchmove', (e) => {
+        this.mouseEvent(e)
+      })
       document.addEventListener('mouseup', this.onMouseUpChild)
+      document.addEventListener('touchend', this.onMouseUpChild)
 
     })
   },
@@ -346,11 +351,13 @@ export default {
 </script>
 
 <style lang="scss">
+
 .list {
   &__head {
     display: flex;
     margin-bottom: 23px;
   }
+
   ul {
     list-style: none;
     padding: 0;
@@ -358,6 +365,14 @@ export default {
   }
   .category-list {
     &__parent {
+      &:not(:last-child) .category-parent {
+        border-bottom: none;
+      }
+      &.active-accordion {
+        &:not(:last-child) .category-parent {
+          border-bottom: 1px solid $lightgrey;
+        }
+      }
       &:last-child {
         .category-child:last-child {
           border-bottom: 1px solid $lightgrey;

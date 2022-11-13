@@ -13,12 +13,16 @@
       CategoryChild(
         @mouseup="this.mouseUp"
         @mousedown="this.mouseDown"
+        @touchstart="this.mouseDown"
+        @touchend="this.mouseUp"
         :object="element"
         :class="(element.isMove ? 'opacity' : '') + (hoverElId === element.id ? ' hover' : '')"
         :data-id="element.id")
       CategoryChild(v-if="element.isMove"
         @mouseup="this.mouseUp"
         @mousedown="this.mouseDown"
+        @touchstart="this.mouseDown"
+        @touchend="this.mouseUp"
         :object="element"
         :class="'move'"
         :data-id="element.id"
@@ -60,6 +64,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+@import "src/assets/styles/_breakpoints.scss";
 .category {
   &:hover {
     cursor: grab;
@@ -72,7 +77,6 @@ export default {
     pointer-events: none;
     border: 1px solid $lightgrey;
     box-shadow: $blue-boxshadow;
-
     .category-children {
       display: none;
     }
@@ -87,7 +91,12 @@ export default {
     align-items: baseline;
     gap: 16px;
     background-color: white;
-
+    @include md {
+      flex-wrap: wrap;
+      .first-title {
+        max-width: 65%
+      }
+    }
     &__subtitle {
       font-weight: 400;
       font-size: 11px;
