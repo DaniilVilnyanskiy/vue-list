@@ -36,7 +36,6 @@
         v-if="object.isMove"
         :object="object"
         @mousedown="this.onMouseDown"
-        @touchstart="this.onMouseDown"
         class="move"
         :data-id="object.id"
         :style=`{top: object.isMove ? this.data.coords.y - 20 + 'px' : 0,
@@ -211,6 +210,7 @@ export default {
      * Отпускание мыши
      */
     onMouseUpChild(e) {
+      // console.log(e);
       if (typeof e === 'undefined') return;
 
       this.data.cursorGrab = false;
@@ -218,6 +218,9 @@ export default {
 
       this.setElementMove(-1);
       // console.log(this.data.dataParent);
+      // console.log(this.data.hoverElId);
+      // console.log(this.data.moveElementId);
+      // console.log(!this.data.dataParent);
       if (this.data.hoverElId !== -1 && this.data.hoverElId !== this.data.moveElementId && !this.data.dataParent) {
         this.changeArray(this.data.hoverElId)
       }
@@ -263,7 +266,6 @@ export default {
             this.init.splice(i+1, 0, el)
           } else {
             this.init[i].children.splice(0,0, el)
-            console.log('test');
           }
         }
         if (typeof elem.children !== 'undefined') {
@@ -281,16 +283,20 @@ export default {
     },
     initAccordion(obj) {
       if (typeof obj == 'undefined') return
-      console.log(obj);
       obj.isActiveAcc !== true ? obj.isActiveAcc = true : delete obj.isActiveAcc;
     },
     mouseEvent(e) {
+      if (e.type === 'touchmove') {
+        this.data.coords.y = e.changedTouches[0].clientY;
+        this.data.coords.x = e.changedTouches[0].clientX;
+      } else {
+        this.data.coords.y = e.y;
+        this.data.coords.x = e.x;
+      }
       if (!this.data.isMove) {
         this.data.hoverElId = -1
         return
       }
-      this.data.coords.y = e.y;
-      this.data.coords.x = e.x;
       if (e.target.closest('.category-child')) {
         if (this.data.dataParentt !== true) {
           this.data.hoverElId = Number(e.target.closest('.category-child').dataset.id);
@@ -318,9 +324,7 @@ export default {
           string.parentElement.classList.add('d-none')
           string.parentElement.classList.remove('d-block')
 
-          // console.log(parent);
           if (parent) {
-            console.log(parent.querySelectorAll('.category-child-li.d-block'));
             if (parent.querySelectorAll('.category-child-li.d-block').length === 0) {
               parent.classList.add('d-none')
             } else {

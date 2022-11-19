@@ -10,7 +10,7 @@ export default {
       return 'icon icon-' + this.icon;
     },
     concatXlink: function () {
-      return './vue-list/images/svg/sprite.svg#' + this.icon
+      return '/vue-list/images/svg/sprite.svg#' + this.icon
     }
   },
 }

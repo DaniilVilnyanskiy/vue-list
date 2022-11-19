@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check build-only",
+    "build-and-deploy": "run-p type-check build-only deploy",
     "preview": "vite preview --port 4173",
     "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit"
+    "type-check": "vue-tsc --noEmit",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "gh-pages": "^4.0.0",
     "vue": "^3.2.38",
     "vue-router": "^4.1.5"
   },
